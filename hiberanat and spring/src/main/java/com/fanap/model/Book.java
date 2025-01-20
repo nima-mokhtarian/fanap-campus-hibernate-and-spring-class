@@ -27,16 +27,6 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private Category category;
     @Version
+    @JsonIgnore
     private int version;
-
-    @Override
-    public String toString() {
-        return "Book{" +
-                "id=" + id +
-                ", mainTitle='" + mainTitle + '\'' +
-                ", price=" + price +
-                ", category=" + category +
-                ", version=" + version +
-                '}';
-    }
 }

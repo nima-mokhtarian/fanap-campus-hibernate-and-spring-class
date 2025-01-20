@@ -2,12 +2,16 @@ package com.fanap.service;
 
 import com.fanap.dataaccess.AuthorRepository;
 import com.fanap.model.Author;
+import com.fanap.model.Book;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class AuthorServiceImpl implements AuthorService {
@@ -22,8 +26,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<Author> findAll() {
-        return entityManager.createQuery("from Author", Author.class)
-               .getResultList();
+        return authorRepository.findAll();
     }
 
     @Override
@@ -33,9 +36,8 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<Author> findAll(int from, int size) {
-        return entityManager.createQuery("from Author", Author.class)
-                .setFirstResult(from)
-                .setMaxResults(size).getResultList();
+        Page<Author> authorList = authorRepository.findAll(PageRequest.of(from / size, size));
+        return authorList.stream().collect(Collectors.toList());
     }
 
 
@@ -60,25 +62,46 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<Author> findByFirstName(String firstName) {
-        return null;
+        return authorRepository.findByFirstName(firstName);
     }
 
     @Override
     public List<Author> findByLastName(String lastName) {
-        return null;
+        return authorRepository.findByLastName(lastName);
     }
 
     @Override
     public void save(Author author) {
+        authorRepository.save(author);
     }
 
     @Override
-    public void update(Author author) {
+    public void update(long id, Author author) {
+        authorRepository.findById(id)
+                .ifPresentOrElse(au -> {
+                            author.setId(id);
+                            authorRepository.save(author);
+                        },
+                        () -> {
+                            throw new EmployeeNotFoundException("no employee found with given identifier. id = " + id);
+                        });
     }
 
     @Override
-    public void delete(Author author) {
+    public void delete(Long id) {
+        authorRepository.deleteById(id);
     }
 
-
+    @Override
+    public void addBook(long id, Book book) {
+        authorRepository.findById(id)
+                .ifPresentOrElse(au -> {
+                            book.setAuthor(au);
+                            au.getBooks().add(book);
+                            authorRepository.save(au);
+                        },
+                        () -> {
+                            throw new EmployeeNotFoundException("no employee found with given identifier. id = " + id);
+                        });
+    }
 }

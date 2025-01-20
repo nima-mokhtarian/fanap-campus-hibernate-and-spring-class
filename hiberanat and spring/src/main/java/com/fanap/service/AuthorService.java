@@ -2,6 +2,7 @@ package com.fanap.service;
 
 
 import com.fanap.model.Author;
+import com.fanap.model.Book;
 
 import java.util.List;
 
@@ -24,7 +25,9 @@ public interface AuthorService {
 
     void save(Author author);
 
-    void update(Author author);
+    void update(long id, Author author);
 
-    void delete(Author author);
+    void delete(Long id);
+
+    void addBook(long id, Book book);
 }
